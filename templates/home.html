@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>All Classes</title></head>
+<body>
+    <h1>Available Classes</h1>
+    <ul>
+        {% for c in classes %}
+        <li>{{ c.title }} ({{ c.students|length }} students enrolled)</li>
+        {% endfor %}
+    </ul>
+
+    {% if alice %}
+        <a href="{{ url_for('student_classes', student_id=alice.id) }}">Go to {{ alice.name }}'s Dashboard</a>
+    {% else %}
+        <p style="color:red;">Alice not found in database.</p>
+    {% endif %}
+</body>
+</html>
