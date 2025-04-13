@@ -1,91 +1,290 @@
-from flask import Flask, render_template, redirect, request, url_for, session
-from models import db, Student, Class
+
+from flask import Flask, redirect, url_for, request, render_template
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
+from models import db, User, Course, Teacher, Student, Enrollment
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dashboard.db'
+app.config['SECRET_KEY'] = 'super secret'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///example.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'supersecretkey'  # Required for session
 
 db.init_app(app)
 
-# Shared password to enter the app
-ACCESS_PASSWORD = "secret123"
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
-# ✅ Login page
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route('/')
+def home():
+    return redirect('/login')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        username = request.form.get('username')
         password = request.form.get('password')
-        if password == ACCESS_PASSWORD:
-            session['authenticated'] = True
-            return redirect(url_for('dashboard'))
-        return render_template('login.html', error="Incorrect password.")
-    return render_template('login.html')
+        user = User.query.filter_by(username=username).first()
+        if user and user.password == password:
+            login_user(user)
+            return redirect('/adminpanel')
+        return "Invalid credentials"
+    return '''
+    <head>
+        <link rel="stylesheet" href="/static/adminstyle.css">
+        <title>Admin Login</title>
+    </head>
+    <body>
+        <div class="login-container">
+            <h2>Admin Login</h2>
+            <form method="POST" class="form-box">
+                <label>Username:</label><br>
+                <input name="username" type="text"><br>
+                <label>Password:</label><br>
+                <input name="password" type="password"><br>
+                <input type="submit" value="Login">
+            </form>
+        </div>
+    </body>'''
 
-# ✅ Logout route
 @app.route('/logout')
+@login_required
 def logout():
-    session.pop('authenticated', None)
-    return redirect(url_for('login'))
+    logout_user()
+    return "Logged out"
 
-# ✅ Protected route decorator
-def login_required(view):
-    def wrapper(*args, **kwargs):
-        if not session.get('authenticated'):
-            return redirect(url_for('login'))
-        return view(*args, **kwargs)
-    wrapper.__name__ = view.__name__
-    return wrapper
-
-# ✅ New "/" route to start at login
-@app.route('/')
-def index():
-    if not session.get('authenticated'):
-        return redirect(url_for('login'))
-    return redirect(url_for('dashboard'))
-
-# ✅ Dashboard route (previously home)
-@app.route('/dashboard')
+@app.route('/adminpanel', methods=['GET', 'POST'])
 @login_required
-def dashboard():
-    classes = Class.query.all()
-    alice = Student.query.filter_by(name='Alice').first()  # Assuming 'Alice' is in the DB
-    return render_template('home.html', classes=classes, alice=alice)
+def admin_panel():
+    courses = Course.query.all()
+    teachers = Teacher.query.all()
 
-@app.route('/signup', methods=['POST'])
+    # Handle new course creation
+    if request.method == 'POST':
+        name = request.form.get('name')
+        time = request.form.get('time')
+        teacher_id = request.form.get('teacher_id')
+        if name and time and teacher_id:
+            new_course = Course(name=name, time=time, teacher_id=int(teacher_id))
+            db.session.add(new_course)
+            db.session.commit()
+            return redirect('/adminpanel')
+        
+    if request.form.get('form_type') == 'add_teacher':
+        teacher_name = request.form.get('teacher_name')
+        if teacher_name:
+            new_teacher = Teacher(name=teacher_name)
+            db.session.add(new_teacher)
+            db.session.commit()
+            return redirect('/adminpanel')
+        
+    if request.form.get('form_type') == 'add_student':
+        student_name = request.form.get('student_name')
+        if student_name:
+            new_student = Student(name=student_name)
+            db.session.add(new_student)
+            db.session.commit()
+            return redirect('/adminpanel')
+
+    html = '''
+    <head>
+        <link rel="stylesheet" href="/static/adminstyle.css">
+    </head>
+    <body>
+    <h2>Courses</h2>
+    <table border="1" cellpadding="5">
+        <tr><th>Name</th><th>Teacher</th><th>Time</th><th>Students</th><th>Action</th></tr>'''
+    for course in courses:
+        html += f"<tr><td><a href='/course/{course.id}'>{course.name}</a></td><td>{course.teacher.name}</td><td>{course.time}</td><td>{len(course.enrollments)}</td>"
+        html += f"<td><a href='/edit_course/{course.id}'>Edit</a></td></tr>"
+    html += "</table><br>"
+
+    # Add new course form
+    html += '''
+    <div style="display: flex; gap: 40px; margin-top: 20px;">
+
+        <div style="display:inline-block; vertical-align:top;">
+            <h3>Add New Course</h3>
+            <form method="POST">
+                <input type="hidden" name="form_type" value="add_course">
+                <label>Course Name:</label><br>
+                <input name="name"><br>
+                <label>Time:</label><br>
+                <input name="time"><br>
+                <label>Teacher:</label><br>
+                <select name="teacher_id">
+                    <option value="">-- Select a teacher --</option>'''
+    for t in teachers:
+        html += f"<option value='{t.id}'>{t.name}</option>"
+    html += '''</select><br><br>
+            <input type="submit" value="Add Course">
+        </form>
+    </div>
+
+    <div style="display:inline-block; vertical-align:top;">
+        <h3>Add New Teacher</h3>
+        <form method="POST">
+            <input type="hidden" name="form_type" value="add_teacher">
+            <label>Teacher Name:</label><br>
+            <input name="teacher_name"><br><br>
+            <input type="submit" value="Add Teacher">
+        </form>
+    </div>
+
+    <div style="display:inline-block; vertical-align:top;">
+        <h3>Add New Student</h3>
+        <form method="POST">
+            <input type="hidden" name="form_type" value="add_student">
+            <label>Student Name:</label><br>
+            <input name="student_name"><br><br>
+            <input type="submit" value="Add Student">
+        </form>
+    </div>
+
+    </div>
+    '''
+    html += '''
+    <br><hr><h3>All Teachers</h3>
+    <table border="1" cellpadding="5">
+        <tr><th>ID</th><th>Name</th></tr>'''
+    for teacher in teachers:
+        html += f'''
+        <tr>
+            <td>{teacher.id}</td>
+            <td>{teacher.name}</td>
+            <td>
+                <form method="POST" action="/delete_teacher/{teacher.id}" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this teacher?')">Delete</button>
+                </form>
+            </td>
+        </tr>'''
+    html += "</table>"
+
+    students = Student.query.all()
+    html += '''
+    <br><h3>All Students</h3>
+    <table border="1" cellpadding="5">
+        <tr><th>ID</th><th>Name</th></tr>'''
+    for student in students:
+        html += f'''
+        <tr>
+            <td>{student.id}</td>
+            <td>{student.name}</td>
+            <td>
+                <form method="POST" action="/delete_student/{student.id}" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this student?')">Delete</button>
+                </form>
+            </td>
+        </tr>'''
+    html += "</table>"
+
+    html += "<br><a href='/logout'>Logout</a></body>"
+    return html
+
+@app.route('/edit_course/<int:course_id>', methods=['GET', 'POST'])
 @login_required
-def signup():
-    student_id = int(request.form['student_id'])
-    class_id = int(request.form['class_id'])
-    student = Student.query.get(student_id)
-    classroom = Class.query.get(class_id)
+def edit_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    teachers = Teacher.query.all()
 
-    if classroom not in student.classes:
-        student.classes.append(classroom)
+    if request.method == 'POST':
+        course.name = request.form.get('name')
+        course.time = request.form.get('time')
+        course.teacher_id = int(request.form.get('teacher_id'))
         db.session.commit()
+        return redirect('/adminpanel')
 
-    return redirect(url_for('student_classes', student_id=student.id))
+    html = f'''
+    <head>
+        <link rel="stylesheet" href="/static/adminstyle.css">
+    </head>
+    <body>
+    <h2>Edit Course: {course.name}</h2>
+    <form method="POST">
+      <label>Name:</label><br>
+      <input name="name" value="{course.name}"><br>
+      <label>Time:</label><br>
+      <input name="time" value="{course.time}"><br>
+      <label>Teacher:</label><br>
+      <select name="teacher_id">'''
+    for t in teachers:
+        selected = 'selected' if t.id == course.teacher_id else ''
+        html += f'<option value="{t.id}" {selected}>{t.name}</option>'
+    html += '''</select><br><br>
+      <input type="submit" value="Save">
+    </form>
+    <br><a href="/adminpanel">Back to Admin Panel</a></body>'''
+    return html
 
-@app.route('/unenroll/<int:student_id>/<int:class_id>', methods=['POST'])
+@app.route('/course/<int:course_id>', methods=['GET', 'POST'])
 @login_required
-def unenroll(student_id, class_id):
-    student = Student.query.get_or_404(student_id)
-    classroom = Class.query.get_or_404(class_id)
+def course_detail(course_id):
+    course = Course.query.get_or_404(course_id)
+    all_students = Student.query.all()
+    enrolled_ids = [e.student_id for e in course.enrollments]
 
-    if classroom in student.classes:
-        student.classes.remove(classroom)
+    if request.method == 'POST':
+        for enrollment in course.enrollments:
+            grade_field = f"grade_{enrollment.student_id}"
+            if grade_field in request.form:
+                enrollment.grade = request.form[grade_field]
+
+        new_student_id = request.form.get('new_student_id')
+        if new_student_id and new_student_id != "":
+            new_student_id = int(new_student_id)
+            if new_student_id not in enrolled_ids:
+                new_enrollment = Enrollment(student_id=new_student_id, course_id=course.id, grade='N/A')
+                db.session.add(new_enrollment)
+
+        if 'remove_student_id' in request.form:
+            remove_id = int(request.form['remove_student_id'])
+            Enrollment.query.filter_by(course_id=course.id, student_id=remove_id).delete()
+
         db.session.commit()
+        return redirect(f'/course/{course.id}')
 
-    return redirect(url_for('student_classes', student_id=student.id))
+    html = f'''
+    <head>
+        <link rel="stylesheet" href="/static/adminstyle.css">
+    </head>
+    <body>
+    <h2>Course: {course.name}</h2>
+    <p>Teacher: {course.teacher.name} | Time: {course.time}</p>
+    <form method='POST'><table border='1'><tr><th>Student</th><th>Grade</th><th>Remove</th></tr>'''
+    for enrollment in course.enrollments:
+        html += f"<tr><td>{enrollment.student.name}</td>"
+        html += f"<td><input name='grade_{enrollment.student.id}' value='{enrollment.grade}'></td>"
+        html += f"<td><button name='remove_student_id' value='{enrollment.student.id}'>Remove</button></td></tr>"
+    html += '''</table><br>
 
-@app.route('/student/<int:student_id>')
+    <label>Add Student:</label><select name='new_student_id'>"
+    "<option value=''>-- Select a student --</option>'''
+    for student in all_students:
+        if student.id not in enrolled_ids:
+            html += f"<option value='{student.id}'>{student.name}</option>"
+    html += '''</select><br><br><input type='submit' value='Save Changes'></form>
+    <br><a href='/adminpanel'>Back to Admin Panel</a></body>'''
+    return html
+
+@app.route('/delete_teacher/<int:teacher_id>', methods=['POST'])
 @login_required
-def student_classes(student_id):
+def delete_teacher(teacher_id):
+    teacher = Teacher.query.get_or_404(teacher_id)
+    db.session.delete(teacher)
+    db.session.commit()
+    return redirect('/adminpanel')
+
+@app.route('/delete_student/<int:student_id>', methods=['POST'])
+@login_required
+def delete_student(student_id):
     student = Student.query.get_or_404(student_id)
-    return render_template('signup.html', student=student, classes=Class.query.all())
+    db.session.delete(student)
+    db.session.commit()
+    return redirect('/adminpanel')
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
-
