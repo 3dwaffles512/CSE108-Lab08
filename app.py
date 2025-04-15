@@ -1,56 +1,113 @@
 from flask import Flask, render_template, redirect, request, url_for, session
-from models import db, Student, Class
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dashboard.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'supersecretkey'  # Required for session
+app.config['SECRET_KEY'] = 'supersecretkey'
 
-db.init_app(app)
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 
-# Shared password to enter the app
-ACCESS_PASSWORD = "secret123"
+# Models
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, nullable=False)
+    password = db.Column(db.String(64), nullable=False)
+    role = db.Column(db.String(10), nullable=False)
 
-# ✅ Login page
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True)
+    #classes = db.relationship('Class', secondary='enrollments', backref='students')
+
+class Teacher(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+class Class(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    time = db.Column(db.String(100))
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'))
+
+class Enrollment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
+    class_id = db.Column(db.Integer, db.ForeignKey('class.id'))
+    grade = db.Column(db.String(5))
+
+    student = db.relationship('Student', backref='enrollments')
+    course = db.relationship('Class', backref='enrollments')
+
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        password = request.form.get('password')
-        if password == ACCESS_PASSWORD:
-            session['authenticated'] = True
-            return redirect(url_for('dashboard'))
-        return render_template('login.html', error="Incorrect password.")
+        username = request.form.get('username').strip()
+        password = request.form.get('password').strip()
+        user = User.query.filter_by(username=username, password=password).first()
+        if user:
+            login_user(user)
+            if user.role == 'admin':
+                return redirect(url_for('admin_panel'))
+            elif user.role == 'teacher':
+                return redirect(url_for('teacher_dashboard'))
+            elif user.role == 'student':
+                student = Student.query.filter_by(user_id=user.id).first()
+                if student:
+                    return redirect(url_for('student_dashboard', student_id=student.id))
+                else:
+                    return "Student profile not found", 404
+        return render_template('login.html', error="Invalid credentials")
     return render_template('login.html')
 
-# ✅ Logout route
 @app.route('/logout')
+@login_required
 def logout():
-    session.pop('authenticated', None)
+    logout_user()
     return redirect(url_for('login'))
 
-# ✅ Protected route decorator
-def login_required(view):
-    def wrapper(*args, **kwargs):
-        if not session.get('authenticated'):
-            return redirect(url_for('login'))
-        return view(*args, **kwargs)
-    wrapper.__name__ = view.__name__
-    return wrapper
-
-# ✅ New "/" route to start at login
-@app.route('/')
-def index():
-    if not session.get('authenticated'):
-        return redirect(url_for('login'))
-    return redirect(url_for('dashboard'))
-
-# ✅ Dashboard route (previously home)
-@app.route('/dashboard')
+# ---------- Admin ----------
+@app.route('/adminpanel')
 @login_required
-def dashboard():
+def admin_panel():
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        return redirect(url_for('login'))
     classes = Class.query.all()
-    alice = Student.query.filter_by(name='Alice').first()  # Assuming 'Alice' is in the DB
-    return render_template('home.html', classes=classes, alice=alice)
+    return render_template('admin_panel.html', classes=classes)
+
+@app.route('/edit_course/<int:class_id>', methods=['GET', 'POST'])
+@login_required
+def edit_course(class_id):
+    if current_user.role != 'admin':
+        return redirect(url_for('login'))
+    course = Class.query.get_or_404(class_id)
+    if request.method == 'POST':
+        course.title = request.form.get('title')
+        db.session.commit()
+        return redirect(url_for('admin_panel'))
+    return render_template('edit_course.html', course=course)
+
+# ---------- Student ----------
+@app.route('/student/<int:student_id>')
+@login_required
+def student_dashboard(student_id):
+    student = Student.query.get_or_404(student_id)
+    return render_template('signup.html', student=student, classes=Class.query.all())
 
 @app.route('/signup', methods=['POST'])
 @login_required
@@ -59,33 +116,51 @@ def signup():
     class_id = int(request.form['class_id'])
     student = Student.query.get(student_id)
     classroom = Class.query.get(class_id)
-
     if classroom not in student.classes:
         student.classes.append(classroom)
         db.session.commit()
-
-    return redirect(url_for('student_classes', student_id=student.id))
+    return redirect(url_for('student_dashboard', student_id=student.id))
 
 @app.route('/unenroll/<int:student_id>/<int:class_id>', methods=['POST'])
 @login_required
 def unenroll(student_id, class_id):
     student = Student.query.get_or_404(student_id)
     classroom = Class.query.get_or_404(class_id)
-
     if classroom in student.classes:
         student.classes.remove(classroom)
         db.session.commit()
+    return redirect(url_for('student_dashboard', student_id=student.id))
 
-    return redirect(url_for('student_classes', student_id=student.id))
-
-@app.route('/student/<int:student_id>')
+# ---------- Teacher ----------
+@app.route('/teacher/dashboard')
 @login_required
-def student_classes(student_id):
-    student = Student.query.get_or_404(student_id)
-    return render_template('signup.html', student=student, classes=Class.query.all())
+def teacher_dashboard():
+    if current_user.role != 'teacher':
+        return redirect(url_for('login'))
+    teacher = Teacher.query.filter_by(user_id=current_user.id).first()
+    classes = Class.query.filter_by(teacher_id=teacher.id).all()
+    return render_template('teacher_dashboard.html', teacher=teacher, classes=classes)
+
+@app.route('/teacher/course/<int:class_id>', methods=['GET', 'POST'])
+@login_required
+def teacher_class_detail(class_id):
+    course = Class.query.get_or_404(class_id)
+    enrollments = Enrollment.query.filter_by(class_id=class_id).all()
+    if request.method == 'POST':
+        for enrollment in enrollments:
+            grade_field = f"grade_{enrollment.student_id}"
+            if grade_field in request.form:
+                enrollment.grade = request.form[grade_field]
+        db.session.commit()
+        return redirect(url_for('teacher_class_detail', class_id=class_id))
+    return render_template('teacher_course_detail.html', course=course, enrollments=enrollments)
+@app.route('/debug/users')
+def debug_users():
+    users = User.query.all()
+    return '<br>'.join(f"Username: {u.username}, Password: {u.password}, Role: {u.role}" for u in users)
+
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-
