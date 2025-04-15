@@ -1,0 +1,91 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 30px;
+    background-color: #f8f9fa;
+}
+
+h2, h3 {
+    color: #333;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+    background-color: #fff;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+form {
+    margin-top: 10px;
+}
+
+input[type="text"], select, input[type="password"] {
+    padding: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+input[type="submit"], button {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.flex-forms {
+    display: flex;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.flex-forms > div {
+    flex: 1;
+    background-color: #fff;
+    padding: 15px;
+    border: 1px solid #ccc;
+}
+
+p {
+    font-size: 16px;
+    margin: 10px 0 20px;
+}
+
+select {
+    width: 250px;
+}
+
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
