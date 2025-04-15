@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html>
-<head><title>Login</title></head>
-<body>
-    <h2>Enter Username and Password to Access Dashboard</h2>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class = "login">
+<!--     <h2>Enter Username and Password to Access Dashboard</h2> -->
+    <h2>Sign in to your account</h2>
     {% if error %}
         <p style="color:red;">{{ error }}</p>
     {% endif %}
