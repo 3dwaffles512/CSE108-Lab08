@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ course.name }} - Student Grades</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminstyle.css') }}">
+</head>
+<body>
+    <h1>{{ course.name }}</h1>
+    <h2>Time: {{ course.time }}</h2>
+
+    <h2>Enrolled Students</h2>
+    <form method="POST">
+        <table border="1" cellpadding="8" cellspacing="0" style="border-color: #ccc;">
+            <tr>
+                <th>Student</th>
+                <th>Grade</th>
+            </tr>
+            {% for enrollment in enrollments %}
+            <tr>
+                <td>{{ enrollment.student.name }}</td>
+                <td>
+                    <input type="text" name="grade_{{ enrollment.student.id }}" value="{{ enrollment.grade }}">
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <input type="submit" value="Save Grades">
+    </form>
+
+    <br><a href="{{ url_for('teacher_dashboard') }}">← Back to Dashboard</a>
+</body>
+</html>
