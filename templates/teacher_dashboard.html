@@ -1,21 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>{{ teacher.name }}'s Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='adminstyle.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='teacher.css') }}">
 </head>
 <body>
-    <h1>Welcome, {{ teacher.name }}!</h1>
-    <h2>Your Classes</h2>
-    <ul>
-        {% for c in classes %}
-        <li>
-            {{ c.title }} - {{ c.students|length }} student{{ 's' if c.students|length != 1 else '' }}
-            (<a href="{{ url_for('teacher_class_detail', class_id=c.id) }}">View Students & Edit Grades</a>)
-        </li>
-        {% endfor %}
-    </ul>
-    <br>
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <header class = "dashboard-header">
+      <h1>Welcome, {{ teacher.name }}!</h1>
+    </header>
+
+    <main>
+        <section>
+            <h2>Your Classes</h2>
+            <table>
+            <tr><th>Course Name</th><th>Time</th><th>Students</th></tr>
+            {% for course in classes %}
+            <tr>
+                <td><a href="{{ url_for('teacher_class_detail', class_id=course.id) }}">{{ course.title }}</a></td>
+                <td>{{ course.time }}</td>
+                <td>{{ course.enrollments|length }} / {{ course.capacity }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        </section>
+        <div class="logout-container">
+            <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        </div>
+</main>
 </body>
 </html>
