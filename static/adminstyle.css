@@ -8,6 +8,28 @@ body {
     background-color: #f8f9fa;
 }
 
+main {
+    max-width: 800px;
+    margin: auto;
+}
+
+section {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+header.dashboard-header {
+    background-color: #343a40;
+    color: white;
+    padding: 20px;
+    margin: -30px -30px 30px -30px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
 h2, h3 {
     color: #F5F5F5;
 }
@@ -33,6 +55,11 @@ a {
     text-decoration: none;
 }
 
+.logout-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
 .logout {
     display: inline-block;
     background-color: #dc3545;
@@ -41,6 +68,10 @@ a {
     border-radius: 4px;
     text-decoration: none;
     transition: background-color 0.2s ease-in-out;
+}
+
+.logout:hover {
+    background-color: #c82333;
 }
 
 form {

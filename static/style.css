@@ -31,14 +31,14 @@ body {
 }
 
 .login label {
-    padding-left: 40px;
+    padding-left: 30px;
     font-size: large;
 }
 
 .login button {
     width: 100%;
     padding: 10px;
-    background-color: rgb(45,136,37);
+    background-color: #0056b3;
     color: white;
     border: none;
     border-radius: 5px;
