@@ -1,6 +1,5 @@
 body {
     background-color: #DFCFBE;
-
 }
 
 .login {
@@ -14,7 +13,7 @@ body {
     width: 320px;
     margin: 100px auto;
     padding: 45px;
-
+    border-radius: 5px;
 }
 
 .login h2 {
@@ -25,12 +24,24 @@ body {
 
 }
 
+.login input[type="text"],
+.login input[type="password"] {
+    border-radius: 5px;
+    background-color: #ECECEC;
+}
+
+.login label {
+    padding-left: 40px;
+    font-size: large;
+}
+
 .login button {
     width: 100%;
     padding: 10px;
     background-color: rgb(45,136,37);
     color: white;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
 }
 
