@@ -1,8 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     margin: 30px;
-    /* background-color: #f8f9fa; */
-    background-color: rgb(26,45,52);
+    background-color: #f8f9fa;
 }
 
 table {
@@ -39,6 +38,20 @@ header.dashboard-header {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
+a.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #dc3545;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a.back-link:hover {
+    color: #d82f3f;
+    text-decoration: underline;
+}
+
 main {
     max-width: 800px;
     margin: auto;
@@ -52,8 +65,11 @@ section {
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
+h1 {
+    margin-bottom: 15px;
+}
+
 h2 {
-    color: #333;
     margin-bottom: 15px;
 }
 
