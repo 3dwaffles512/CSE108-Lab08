@@ -28,8 +28,8 @@
     </section>
     <!-- This is the Add New stuff section -->
     <section>
-        <div style="display: flex; gap: 40px; margin-top: 10px;">
-            <div>
+        <div style="display: flex; gap: 50px; margin-top: 10px;" id = "wrapper">
+            <div class = "newCourse">
                 <!-- This is the Add new course -->
                 <h3>Add New Course</h3>
                 <form method="POST">
@@ -39,7 +39,7 @@
                     <label>Time:</label><br>
                     <input name="time"><br>
                     <label>Capacity:</label><br>
-                    <input name = "capacity" type = "number" min = "0" value = "30"><br>
+                    <input name = "capacity" type = "number" min = "5" value = "30"><br>
                     <label>Teacher:</label><br>
                     <select name="teacher_id">
                         <option value="">-- Select a teacher --</option>
@@ -51,7 +51,7 @@
                 </form>
             </div>
 
-            <div>
+            <div class = "newTeach">
                 <!-- This is the Add new Teacher -->
                 <h3>Add New Teacher</h3>
                 <form method="POST">
@@ -62,7 +62,7 @@
                 </form>
             </div>
 
-            <div>
+            <div class = "newStud">
                 <!-- This is the Add new student -->
                 <h3>Add New Student</h3>
                 <form method="POST">
