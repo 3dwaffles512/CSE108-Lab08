@@ -192,7 +192,9 @@ def delete_student(student_id):
 @login_required
 def student_dashboard(student_id):
     student = Student.query.get_or_404(student_id)
-    return render_template('signup.html', student=student, classes=Class.query.all())
+    classes = Class.query.all()
+    enrollments = Enrollment.query.filter_by(student_id=student.id).all()
+    return render_template('signup.html', student=student, classes=classes, enrollments=enrollments)
 
 @app.route('/signup', methods=['POST'])
 @login_required
