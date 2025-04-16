@@ -31,23 +31,29 @@ header.dashboard-header {
 }
 
 h2, h3 {
-    color: #F5F5F5;
+    color: #333333;
+    margin-top: 0px;
 }
 
 table {
     border-collapse: collapse;
     width: 100%;
-    margin-top: 10px;
-    background-color: #fff;
+    margin-bottom: 20px;
 }
 
-table, th, td {
-    border: 1px solid #ccc;
-}
-
-th, td {
-    padding: 10px;
+table th, table td {
+    padding: 12px;
     text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #234d9b;
+    color: #F5F5F5;
+}
+
+table tr:nth-child(even) {
+    background-color: #F2F2F2;
 }
 
 a {
