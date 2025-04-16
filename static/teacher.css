@@ -1,0 +1,135 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 30px;
+    background-color: #f8f9fa;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th, table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #234d9b;
+    color: white;
+}
+
+table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+table tr:hover {
+    background-color: #e2e6ea;
+}
+
+header.dashboard-header {
+    background-color: #343a40;
+    color: white;
+    padding: 20px;
+    margin: -30px -30px 30px -30px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+main {
+    max-width: 800px;
+    margin: auto;
+}
+
+section {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+li {
+    padding: 10px;
+    background-color: #f1f1f1;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+li:hover {
+    background-color: #e2e6ea;
+}
+
+form {
+    display: inline;
+}
+
+select {
+    width: 250px;
+    padding: 6px;
+    margin: 10px 0;
+}
+
+button, input[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+}
+
+button:hover, input[type="submit"]:hover {
+    transform: translateY(-2px);
+    background-color: #0056b3;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.logout-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.logout {
+    display: inline-block;
+    background-color: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.logout:hover {
+    background-color: #c82333;
+}
+
+/* Responsive for small screens */
+@media (max-width: 600px) {
+    main {
+        padding: 10px;
+    }
+
+    select {
+        width: 100%;
+    }
+
+    button, .logout {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
