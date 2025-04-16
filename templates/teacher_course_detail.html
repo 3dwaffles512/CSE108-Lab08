@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{{ course.name }} - Student Grades</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='adminstyle.css') }}">
+    <title>{{ course.title }} - Student Grades</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='teacher.css') }}">
 </head>
 <body>
-    <h1>{{ course.name }}</h1>
-    <h2>Time: {{ course.time }}</h2>
+    <header class = "dashboard-header">
+        <h1>{{ course.title }}</h1>
+        <h2>{{ course.time }}</h2>
+    </header>
+
+    <br><a href="{{ url_for('teacher_dashboard') }}" class="back-link">← Back to Dashboard</a>
 
     <h2>Enrolled Students</h2>
     <form method="POST">
-        <table border="1" cellpadding="8" cellspacing="0" style="border-color: #ccc;">
+        <table>
             <tr>
                 <th>Student</th>
                 <th>Grade</th>
@@ -28,6 +32,10 @@
         <input type="submit" value="Save Grades">
     </form>
 
-    <br><a href="{{ url_for('teacher_dashboard') }}">← Back to Dashboard</a>
+
+    <div class="logout-container">
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    </div>
+
 </body>
 </html>
