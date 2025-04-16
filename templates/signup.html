@@ -10,10 +10,10 @@
     <h2>Enrolled Classes</h2>
     <ul>
         {% if student.classes %}
-            {% for c in student.classes %}
+            {% for enrollment in enrollments %}
                 <li>
-                    {{ c.title }}
-                    <form method="POST" action="{{ url_for('unenroll', student_id=student.id, class_id=c.id) }}" style="display:inline;">
+                    {{ enrollment.course.title }} - Grade: {{ enrollment.grade or 'N/A' }}
+                    <form method="POST" action="{{ url_for('unenroll', student_id=student.id, class_id=enrollment.course.id) }}" style="display:inline;">
                         <button type="submit">Remove</button>
                     </form>
                 </li>
@@ -39,6 +39,6 @@
     </form>
 
     <br>
-    <a href="/">← Back to All Classes</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
 </body>
 </html>
