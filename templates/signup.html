@@ -2,43 +2,52 @@
 <html>
 <head>
     <title>{{ student.name }}'s Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='adminstyle.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
 </head>
 <body>
-    <h1>{{ student.name }}'s Dashboard</h1>
+    <header class="dashboard-header">
+        <h1>Welcome, {{ student.name }}</h1>
+    </header>
 
-    <h2>Enrolled Classes</h2>
-    <ul>
-        {% if student.classes %}
-            {% for enrollment in enrollments %}
-                <li>
-                    {{ enrollment.course.title }} - Grade: {{ enrollment.grade or 'N/A' }}
-                    <form method="POST" action="{{ url_for('unenroll', student_id=student.id, class_id=enrollment.course.id) }}" style="display:inline;">
-                        <button type="submit">Remove</button>
+    <main>
+        <section>
+            <h2>Enrolled Classes</h2>
+            <ul>
+                {% if student.classes %}
+                    {% for enrollment in enrollments %}
+                        <li>
+                            <strong>{{ enrollment.course.title }}</strong> - Grade: {{ enrollment.grade or 'N/A' }}
+                            <form method="POST" action="{{ url_for('unenroll', student_id=student.id, class_id=enrollment.course.id) }}" style="display:inline;">
+                                <button type="submit">Remove</button>
                     </form>
                 </li>
-            {% endfor %}
+            {% endfor %} 
         {% else %}
             <p>No classes enrolled yet.</p>
-        {% endif %}
-    </ul>
+        {% endif %}      
+            </ul>
+        </section>
 
-    <h2>Available Classes</h2>
-    <form method="POST" action="/signup">
-        <input type="hidden" name="student_id" value="{{ student.id }}">
-        <select name="class_id">
-            {% for c in classes %}
-                {% if c not in student.classes %}
-                <option value="{{ c.id }}">
-                    {{ c.title }} ({{ c.students|length }}/{{ c.capacity }})
-                </option>
-                {% endif %}
-            {% endfor %}
-        </select>
-        <button type="submit">Enroll</button>
-    </form>
+        <section>
+            <h2>Available Classes</h2>
+            <form method="POST" action="/signup">
+                <input type="hidden" name="student_id" value="{{ student.id }}">
+                <select name="class_id">
+                    {% for c in classes %}
+                        {% if c not in student.classes %}
+                        <option value="{{ c.id }}">
+                            {{ c.title }} ({{ c.students|length }}/{{ c.capacity }})
+                        </option>     
+                        {% endif %}
+                {% endfor %}
+            </select>
+            <button type="submit">Enroll</button>
+        </form>
+    </section>
 
-    <br>
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <div class="logout-container">
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    </div>
+</main>
 </body>
 </html>
