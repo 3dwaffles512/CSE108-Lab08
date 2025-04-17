@@ -131,15 +131,40 @@ def admin_panel():
 def edit_course(course_id):
     course = Class.query.get_or_404(course_id)
     teachers = Teacher.query.all()
+    all_students = Student.query.all()
+    enrolled_ids = [e.student_id for e in course.enrollments]
+
+    error = None
 
     if request.method == 'POST':
         course.name = request.form.get('title')
         course.time = request.form.get('time')
+        course.capacity = int(request.form.get('capacity', course.capacity))
         course.teacher_id = int(request.form.get('teacher_id'))
-        db.session.commit()
-        return redirect('/adminpanel')
 
-    return render_template('edit_course.html', course=course, teachers=teachers)
+        for enrollment in course.enrollments:
+            grade_field = f"grade_{enrollment.student_id}"
+            if grade_field in request.form:
+                enrollment.grade = request.form[grade_field]
+
+        new_student_id = request.form.get('new_student_id')
+        if new_student_id:
+            new_student_id = int(new_student_id)
+            if new_student_id not in enrolled_ids:
+                if len(course.students) >= course.capacity:
+                    error = f"Class is full. Max capacity is {course.capacity}."
+                else:
+                    db.session.add(Enrollment(student_id=new_student_id, class_id=course.id, grade='N/A'))
+
+        if 'remove_student_id' in request.form:
+            remove_id = int(request.form['remove_student_id'])
+            Enrollment.query.filter_by(class_id=course.id, student_id=remove_id).delete()
+
+        if not error:
+            db.session.commit()
+            return redirect('/adminpanel')
+
+    return render_template('edit_course.html', course=course, teachers=teachers, all_students=all_students, enrolled_ids=enrolled_ids, error=error)
 
 @app.route('/course/<int:course_id>', methods=['GET', 'POST'])
 @login_required
@@ -149,6 +174,11 @@ def course_detail(course_id):
     enrolled_ids = [e.student_id for e in course.enrollments]
 
     if request.method == 'POST':
+
+        course.title = request.form.get('title', course.title)
+        course.time = request.form.get('time', course.time)
+        course.capacity = int(request.form.get('capacity', course.capacity))
+
         for enrollment in course.enrollments:
             grade_field = f"grade_{enrollment.student_id}"
             if grade_field in request.form:
