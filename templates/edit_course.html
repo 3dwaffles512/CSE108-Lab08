@@ -7,10 +7,60 @@
 <body>
     <div class="container">
         <h1>Edit Course</h1>
+        
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
+
         <form method="POST">
-            <label for="title">Course Title:</label>
+            <label for="title">Course Title:</label><br>
             <input type="text" id="title" name="title" value="{{ course.title }}" required>
             <br><br>
+
+            <label for="time">Time:</label><br>
+            <input type="text" id="time" name="time" value="{{ course.time }}">
+            <br><br>
+
+            <label for="capacity">Capacity:</label><br>
+            <input type="number" id="capacity" name="capacity" value="{{ course.capacity }}">
+            <br><br>
+
+            <label for="teacher_id">Teacher:</label><br>
+            <select id="teacher_id" name="teacher_id" required>
+                {% for teacher in teachers %}
+                    <option value="{{ teacher.id }}" {% if teacher.id == course.teacher_id %}selected{% endif %}>
+                        {{ teacher.name }}
+                    </option>
+                {% endfor %}
+            </select><br><br>
+
+            <h3>Enrolled Students & Grades</h3>
+            <table border="1" cellpadding="5">
+                <tr><th>Name</th><th>Grade</th><th>Remove</th></tr>
+                {% for enrollment in course.enrollments %}
+                <tr>
+                    <td>{{ enrollment.student.name }}</td>
+                    <td>
+                        <input type="text" name="grade_{{ enrollment.student.id }}" value="{{ enrollment.grade }}">
+                    </td>
+                    <td>
+                        <button type="submit" name="remove_student_id" value="{{ enrollment.student.id }}">Remove</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table><br>
+
+            <h3>Enroll New Student</h3>
+            <label for="new_student_id">Select Student:</label><br>
+            <select name="new_student_id" id="new_student_id">
+                <option value="">-- Select Student --</option>
+                {% for student in all_students %}
+                    {% if student.id not in enrolled_ids %}
+                        <option value="{{ student.id }}">{{ student.name }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select><br><br>
+
             <button type="submit">Save Changes</button>
             <a href="{{ url_for('admin_panel') }}">Cancel</a>
         </form>
