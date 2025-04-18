@@ -2,6 +2,15 @@
     background-color: rgb(26,45,52);
 }
 
+.edit_course_admin {
+    background-color: rgb(26,45,52);
+}
+
+.container {
+    width: 700px;
+    margin: auto;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 30px;
@@ -47,7 +56,7 @@ h2, h3 {
     margin-top: 0px;
 }
 
-h3 {
+h1, h3 {
     text-align: center;
 }
 
@@ -107,13 +116,22 @@ input {
     width: 100%;
 }
 
-/* input[type="text"], select, input[type="password"] {
-    padding: 6px;
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 10px;
-    border-radius: 5px;
-} */
+.submitAdminEditButton {
+    overflow: hidden;
+}
+
+.left, .right {
+    display: block;
+}
+
+.left {
+    float: left;
+    padding: 6px 12px;
+}
+
+.right { 
+    float: right;
+}
 
 input[type="submit"], button {
     background-color: #0056b3;
