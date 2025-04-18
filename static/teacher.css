@@ -40,12 +40,13 @@ header.dashboard-header {
 }
 
 a.back-link {
-    display: inline-block;
-    margin-bottom: 20px;
+    display: block;
+    margin-top: 5px;
     color: #dc3545;
     font-weight: bold;
     text-decoration: none;
     transition: color 0.2s ease;
+    float: left;
 }
 
 a.back-link:hover {
@@ -134,6 +135,15 @@ button:hover, input[type="submit"]:hover {
 
 .logout:hover {
     background-color: #c82333;
+}
+
+.bottomLineButtons {
+    overflow: hidden;
+}
+
+.saveGradesButton {
+    display: block;
+    float: right;
 }
 
 /* Responsive for small screens */

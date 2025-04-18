@@ -10,28 +10,32 @@
         <h2>{{ course.time }}</h2>
     </header>
 
-    <br><a href="{{ url_for('teacher_dashboard') }}" class="back-link">← Back to Dashboard</a>
-
-    <h2>Enrolled Students</h2>
-    <form method="POST">
-        <table>
-            <tr>
-                <th>Student</th>
-                <th>Grade</th>
-            </tr>
-            {% for enrollment in enrollments %}
-            <tr>
-                <td>{{ enrollment.student.name }}</td>
-                <td>
-                    <input type="text" name="grade_{{ enrollment.student.id }}" value="{{ enrollment.grade }}">
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-        <br>
-        <input type="submit" value="Save Grades">
-    </form>
-
+    <main>
+        <section>
+            <h2>Enrolled Students</h2>
+            <form method="POST">
+                <table>
+                    <tr>
+                        <th>Student</th>
+                        <th>Grade</th>
+                    </tr>
+                    {% for enrollment in enrollments %}
+                    <tr>
+                        <td>{{ enrollment.student.name }}</td>
+                        <td>
+                            <input type="text" name="grade_{{ enrollment.student.id }}" value="{{ enrollment.grade }}">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                <br>
+                <div class = "bottomLineButtons">
+                    <a href="{{ url_for('teacher_dashboard') }}" class="back-link">← Back to Dashboard</a>
+                    <input class = "saveGradesButton" type="submit" value="Save Grades">
+                </div>
+            </form>
+        </section>
+    </main>
 
     <div class="logout-container">
         <a href="{{ url_for('logout') }}" class="logout">Logout</a>

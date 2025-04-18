@@ -32,8 +32,8 @@ section {
 
 #wrapper {
     /* text-align: center; */
-    width: 80%;
-    margin: 0 auto;
+    width: 700px;
+    margin: auto;
 }
 
 .newTeach, .newStud, .newCourse {
